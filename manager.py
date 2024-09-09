@@ -12,13 +12,14 @@ def update_project_json(project_path: str, output_dll: str, build_type: str):
         with open(project_json_path, "r") as f:
             data = json.load(f)
     except FileNotFoundError:
-        data = {"Project": "", "Built": {}}
+        data = {"Project": "", "Built": []}
 
     # Update project name and DLL path for the build type
     data["Project"] = project_name
-    data["Built"][build_type] = {
+    data["Built"].append ({
+        "build_type": build_type,
         "dll_path": output_dll
-    }
+    })
 
     # Write the updated data back to the JSON file
     with open(project_json_path, "w") as f:
