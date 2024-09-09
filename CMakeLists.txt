@@ -27,6 +27,8 @@ find_package(OpenMP REQUIRED)
 find_package(GraphicsLab REQUIRED)
 find_package(OpenCV)
 
+find_package(Python3 REQUIRED)
+
 # Create the user project executable
 add_library(UserProject SHARED
     src/main.cpp
@@ -35,4 +37,19 @@ add_library(UserProject SHARED
 # Link the engine's libraries (replace YourEngineLib with actual library names)
 target_link_libraries(UserProject
         GraphicsLab::LAB_vkl
+)
+
+# Path to the JSON file
+set(OUTPUT_JSON "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsLabProject.json")
+
+# Define the Python script to update the JSON
+set(UPDATE_JSON_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/manager.py")
+
+# Add post-build step to update JSON with DLL path
+add_custom_command(TARGET UserProject POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=$ENV{PYTHONPATH} ${Python3_EXECUTABLE} ${UPDATE_JSON_SCRIPT}
+        --project-dir "${CMAKE_CURRENT_SOURCE_DIR}"
+        --output-dll "${CMAKE_CURRENT_BINARY_DIR}/$<TARGET_FILE_NAME:UserProject>"
+        --build-type "$<CONFIG>"  # CONFIG will be Debug, Release, etc.
+        COMMENT "Updating ${OUTPUT_JSON} with DLL path and build type"
 )
